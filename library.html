@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Library App</title>
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans" rel="stylesheet">
+    <style>
+      #formuleitus {
+        margin-top: 10px;
+      }
+      input {
+        margin-top: 5px;
+      }
+      body {
+        /* background-color: rgba(124, 184, 255, 0.5); */
+        background-color: rgba(48, 50, 54, 1);
+      }
+      .button {
+        cursor: pointer;
+        background-color: #565B61;
+        color: #e4cb58;
+        padding: 0.5em 1em;
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 24px;
+        border: 2px solid;
+        line-height: 1;
+      }
+      #formuleitus {
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 20px;
+        color: #fff;
+      }
+      #addButton {
+        cursor: pointer;
+        background-color: #565B61;
+        color: #ff7f82;
+        padding: 0.5em 1em;
+        border: 2px solid;
+        margin-top: 5px;
+        font-size: 20px;
+      }
+      .libro {
+        border: 2px solid;
+        border-color: #a972cb;
+        background-color: #565B61;
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 20px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+        min-width: 400px;
+        max-width: 500px;
+      }
+      .deleteButton, .switchButton {
+        cursor: pointer;
+        padding: 0.5em 1em;
+        border: 2px solid;
+        background-color: #34373B;
+        color: #8fc866;
+        margin-top: 5px;
+        margin-left: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <button class='button' onclick='showInputForms()'>new book</button>
+    <div id='input' hidden='true'>
+      <form id='formuleitus'>
+        Title: <input id='titleField' type="text" /><br>
+        Author: <input id='authorField' type='text' /><br>
+        Pages: <input id='pagesField' type='text' /><br>
+        Have read: <input type='radio' name='haveRead' value='true' />True
+                   <input type='radio' name='haveRead' value='false' />False
+      </form>
+      <button id='addButton' onclick='addBookToLibrary()'>add</button>
+    </div>
+    <div id='container'></div>
+    <script>
+      var library = [];
+
+      function showInputForms(){
+        var inputDiv = document.getElementById('input');
+        inputDiv.removeAttribute('hidden');
+      }
+
+      function book(title, author, pages, haveRead){
+        this.title = title
+        this.author = author
+        this.pages = pages
+        this.haveRead = haveRead
+        this.info = function(){
+          return this.title + " by " + this.author + ', ' + this.pages + ' pages, ' + this.haveRead;
+        }
+        this.turnRead = function(){
+          this.haveRead = !this.haveRead;
+          render();
+        }
+      }
+
+      function addBookToLibrary(){
+        var titleVal = document.getElementById('titleField');
+        var authorVal = document.getElementById('authorField');
+        var pagesVal = document.getElementById('pagesField');
+        var haveReadVal = document.querySelector('input[name="haveRead"]:checked');
+        library.push(new book(titleVal.value, authorVal.value, pagesVal.value, JSON.parse(haveReadVal.value)));
+        render();
+
+        document.getElementById('input').setAttribute('hidden', 'true');
+
+        titleVal.value = '';
+        authorVal.value = '';
+        pagesVal.value = '';
+
+        var radios = document.getElementsByName('haveRead')
+        for(var i = 0; i< radios.length; i++){radios[i].checked = false;}
+      }
+
+      function render(){
+        var container = document.getElementById('container');
+        container.innerHTML = '';
+        for(var i = 0; i < library.length; i++){
+          var libro = document.createElement('ul');
+          var titleLi = document.createElement('li');
+          var authorLi = document.createElement('li');
+          var pagesLi = document.createElement('li');
+          var haveReadLi = document.createElement('li');
+          var deleteButton = document.createElement('button');
+          var switchButton = document.createElement('button');
+          deleteButton.textContent = 'delete book';
+          deleteButton.className = 'deleteButton';
+          switchButton.textContent = 'switch read'
+          switchButton.className = 'switchButton'
+
+          libro.setAttribute('id', i);
+          libro.className = 'libro';
+
+          titleLi.textContent = 'Title: ' + library[i].title;
+          authorLi.textContent = 'Author: ' + library[i].author;
+          pagesLi.textContent = 'Pages: ' + library[i].pages;
+          haveReadLi.textContent = 'Have read yet: ' + library[i].haveRead;
+
+          libro.appendChild(titleLi);
+          libro.appendChild(authorLi);
+          libro.appendChild(pagesLi);
+          libro.appendChild(haveReadLi);
+          libro.appendChild(deleteButton);
+          libro.appendChild(switchButton);
+
+          container.appendChild(libro);
+        }
+      }
+
+      function removeBook(pos){
+        library.splice(pos, 1);
+        render();
+      }
+
+      function switchReadVal(pos){
+        library[pos].turnRead();
+      }
+
+      document.addEventListener('click', function(event){
+        if(event.target.className === 'deleteButton'){
+          removeBook(event.target.parentNode.id);
+        } else if(event.target.className === 'switchButton'){
+           switchReadVal(event.target.parentNode.id);
+         }
+      })
+
+      // render();
+    </script>
+  </body>
+</html>
